@@ -1,16 +1,24 @@
 package service
 
 import (
+	"context"
 	"github.com/container-storage-interface/spec/lib/go/csi"
-	"sync"
+	"github.com/propero-oss/csi-vcloud/pkg/common"
+	"github.com/rexray/gocsi"
+	"k8s.io/klog"
+	"net"
+	"os"
+	"strings"
 )
 
 const (
 	// Name is the name of the CSI plug-in.
-	Name = "csi-vcloud.propero-oss.de"
+	Name = "csi-vcloud.propero-oss.dev"
 
 	// VendorVersion is the version returned by GetPluginInfo.
 	VendorVersion = "0.0.1"
+
+	UnixSocketPrefix = "unix://"
 )
 
 var Manifest = map[string]string{
@@ -19,23 +27,49 @@ var Manifest = map[string]string{
 
 // Service is the CSI Mock service provider.
 type Service interface {
-	csi.ControllerServer
+	BeforeServe(context.Context, *gocsi.StoragePlugin, net.Listener) error
+	GetController() csi.ControllerServer
 	csi.IdentityServer
 	csi.NodeServer
 }
 
 type service struct {
-	sync.Mutex
-	nodeID   string
-	vols     []csi.Volume
-	snaps    []csi.Snapshot
-	volsRWL  sync.RWMutex
-	snapsRWL sync.RWMutex
-	volsNID  uint64
-	snapsNID uint64
+	mode string
+	cs Controller
 }
 
-func New() Service {
-	s := &service{nodeID: Name}
-	return s
+
+func (s *service) BeforeServe(ctx context.Context, plugin *gocsi.StoragePlugin, listener net.Listener) error {
+	defer func() {
+		fields := map[string]interface{}{
+			"mode": s.mode,
+		}
+		klog.V(2).Infof("configured: %s with %+v", Name, fields)
+	}()
+
+	s.mode = os.Getenv("X_CSI_MODE")
+
+	if !strings.EqualFold(s.mode, "node") {
+
+		cfg, err  := common.ParseConfig()
+		if err != nil {
+			klog.Errorf("Failed to read config. Error: %v", err)
+			return err
+		}
+		if err := s.cs.Init(cfg); err != nil {
+			klog.Errorf("Failed to init controller. Error: %v", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s* service) GetController() csi.ControllerServer {
+	s.cs = New()
+	return s.cs
+}
+
+func NewService() Service {
+	return &service{}
 }

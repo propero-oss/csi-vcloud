@@ -1,23 +1,18 @@
 package provider
 
 import (
-	"context"
+	"github.com/propero-oss/csi-vcloud/pkg/service"
 	"github.com/rexray/gocsi"
-	"github.com/rexray/gocsi/mock/service"
-	"github.com/sirupsen/logrus"
-	"net"
 )
 
 func New() gocsi.StoragePluginProvider {
-	svc := service.New()
+	svc := service.NewService()
+	ctrl := svc.GetController()
 	return &gocsi.StoragePlugin{
-		Controller:  svc,
+		Controller:  ctrl,
 		Identity:    svc,
 		Node:        svc,
-		BeforeServe: func(ctx context.Context, plugin *gocsi.StoragePlugin, listener net.Listener) error {
-			logrus.WithField("service", service.Name).Debug("BeforeServe")
-			return nil
-		},
+		BeforeServe: svc.BeforeServe,
 		EnvVars:     []string{
 			// Enable serial volume access.
 			gocsi.EnvVarSerialVolAccess + "=true",

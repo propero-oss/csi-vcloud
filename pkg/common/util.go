@@ -1,10 +1,9 @@
-package pkg
+package common
 
 import (
 	"fmt"
-	"log"
 	"os"
-	)
+)
 
 
 func GetHostname() (string, error){

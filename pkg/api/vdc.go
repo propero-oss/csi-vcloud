@@ -7,9 +7,9 @@ import (
 )
 
 
-func (vdc *Vdc) GetVMByVAppName(vAppName string, vmName string) (*govcd.VM, error) {
+func (m *Manager) GetVMByVAppName(vAppName string, vmName string) (*govcd.VM, error) {
 
-	vapp, err := vdc.GetVAppByName(vAppName, true)
+	vapp, err := m.Vdc.GetVAppByName(vAppName, true)
 	if err != nil {
 		return nil, fmt.Errorf("GetVAppByName error")
 	}
@@ -22,7 +22,7 @@ func (vdc *Vdc) GetVMByVAppName(vAppName string, vmName string) (*govcd.VM, erro
 }
 
 // CreateIndependentDisk
-func (vdc *Vdc) CreateIndependentDisk(diskName string, storageProfile string, size int64) *types.Reference{
+func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, size int64) *types.Reference{
 	var diskCreateParams *types.DiskCreateParams
 	diskCreateParams = &types.DiskCreateParams{Disk: &types.Disk{
 		Name: diskName,
@@ -30,7 +30,7 @@ func (vdc *Vdc) CreateIndependentDisk(diskName string, storageProfile string, si
 		Size: size * int64(MiB),
 	}}
 
-	profileRef, err := vdc.FindStorageProfileReference(storageProfile)
+	profileRef, err := m.Vdc.FindStorageProfileReference(storageProfile)
 	if err != nil {
 		fmt.Print("")
 	}
@@ -40,7 +40,7 @@ func (vdc *Vdc) CreateIndependentDisk(diskName string, storageProfile string, si
 	diskCreateParams.Disk.BusType = SCSI
 	diskCreateParams.Disk.Description = "GOVCD Test"
 
-	task, err := vdc.CreateDisk(diskCreateParams)
+	task, err := m.Vdc.CreateDisk(diskCreateParams)
 	if err != nil {
 		fmt.Print(err)
 	}

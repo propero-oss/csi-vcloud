@@ -1,26 +1,19 @@
 package api
 
-import "github.com/vmware/go-vcloud-director/v2/govcd"
-
-type Config struct {
-	User     string
-	Password string
-	Org      string
-	Href     string
-	VDC      string
-	VApp	 string
-	Insecure bool
-}
+import (
+	"github.com/propero-oss/csi-vcloud/pkg/common"
+	"github.com/vmware/go-vcloud-director/v2/govcd"
+)
 
 type Manager struct {
 	Client *govcd.VCDClient
-	Config *Config
-	Vdc *Vdc
+	Config *common.Config
+	Vdc    *govcd.Vdc
 }
 
-type Vdc struct {
+/*type Vdc struct {
 	*govcd.Vdc
-}
+}*/
 
 type VM struct {
 	*govcd.VM
@@ -31,17 +24,4 @@ const (
 	IDE BusType = "5"
 	SCSI = "6"
 	SATA = "20"
-)
-
-type ByteSize float64
-const (
-	_           = iota
-	KiB ByteSize = 1 << (10 * iota)
-	MiB
-	GiB
-	TiB
-	PiB
-	EiB
-	ZiB
-	YiB
 )
