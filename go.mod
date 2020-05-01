@@ -9,13 +9,12 @@ require (
 	github.com/getsentry/sentry-go v0.5.1
 	github.com/rexray/gocsi v1.2.1
 	github.com/vmware/go-vcloud-director/v2 v2.6.0
-	github.com/vmware/govmomi v0.22.2
 	google.golang.org/grpc v1.23.1
+	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/apimachinery v0.17.4
 	k8s.io/client-go v11.0.0+incompatible
 	k8s.io/klog v1.0.0
 	k8s.io/kubernetes v1.17.4
-	sigs.k8s.io/vsphere-csi-driver v1.0.2
 )
 
 replace k8s.io/api => k8s.io/api v0.17.4

@@ -13,7 +13,11 @@ func (s *service) NodeStageVolume(ctx context.Context, request *csi.NodeStageVol
 
 	klog.Infof("NodeStageVolume: VolID: %s pubCtx: %s", volID, pubCtx)
 
-
+	return &csi.NodeStageVolumeResponse{
+		XXX_NoUnkeyedLiteral: struct{}{},
+		XXX_unrecognized:     nil,
+		XXX_sizecache:        0,
+	}, nil
 }
 
 func (s *service) NodeUnstageVolume(ctx context.Context, request *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {

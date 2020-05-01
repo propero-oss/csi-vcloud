@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/propero-oss/csi-vcloud/pkg/common"
 	"github.com/vmware/go-vcloud-director/v2/govcd"
 	"github.com/vmware/go-vcloud-director/v2/types/v56"
 )
@@ -27,12 +28,12 @@ func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, 
 	diskCreateParams = &types.DiskCreateParams{Disk: &types.Disk{
 		Name: diskName,
 		// size is expected to be in MiB therefore we convert it to bytes
-		Size: size * int64(MiB),
+		Size: size * int64(common.MBinBytes),
 	}}
-
+	
 	profileRef, err := m.Vdc.FindStorageProfileReference(storageProfile)
 	if err != nil {
-		fmt.Print("")
+		fmt.Print(err)
 	}
 
 	diskCreateParams.Disk.StorageProfile = &profileRef
@@ -51,6 +52,25 @@ func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, 
 	}
 
 	return task.Task.Owner
+}
+
+func (m *Manager) DeleteDisk(volId string) (error){
+	disk, err := m.Vdc.GetDiskById(volId, true)
+	if err != nil {
+		return err
+	}
+
+	task, err := disk.Delete()
+	if err != nil {
+		return err
+	}
+
+	err = task.WaitTaskCompletion()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 

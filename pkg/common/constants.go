@@ -9,10 +9,11 @@ const (
 	TBinBytes
 	PBinBytes
 	EBinBytes
-	ZBinBytes
-	YBinBytes
 )
 
 const (
 	DEFAULT_VOLUME_SIZE = 10
+
+	MAX_BUS_NUMBER = 3
+	MAX_UNIT_NUMBER = 15
 )
