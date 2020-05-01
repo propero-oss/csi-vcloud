@@ -98,7 +98,7 @@ func (c *controller) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequ
 	if err != nil {
 		msg := fmt.Sprintf("Failed to delete volume: %q. Error: %+v", req.VolumeId, err)
 		klog.Error(msg)
-		//return nil, status.Errorf(codes.Internal, msg)
+		return nil, status.Errorf(codes.OK, msg)
 	}
 
 	return &csi.DeleteVolumeResponse{}, nil
@@ -131,9 +131,22 @@ func (c *controller) ListVolumes(ctx context.Context, request *csi.ListVolumesRe
 
 func (c *controller) GetCapacity(ctx context.Context, req *csi.GetCapacityRequest) (*csi.GetCapacityResponse, error) {
 	//TODO: Figure out if you can query the storage capacity from the VDC
-
 	klog.V(4).Infof("GetCapacity: called with args %+v", *req)
-	return nil, status.Error(codes.Unimplemented, "")
+	resp := &csi.GetCapacityResponse{AvailableCapacity: 0}
+	params := make(map[string]string)
+	params["type"] = "orgVdcStorageProfile"
+	result, err := c.manager.Client.Query(params)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "")
+	}
+
+	for _, record := range result.Results.OrgVdcStorageProfileRecord {
+		if record.Name == os.Getenv("STORAGE_PROFILE") {
+			resp.AvailableCapacity = int64(record.StorageLimitMB) * int64(common.MBinBytes)
+		}
+	}
+
+	return resp, nil
 }
 
 func (c *controller) ControllerGetCapabilities(ctx context.Context, req *csi.ControllerGetCapabilitiesRequest) (*csi.ControllerGetCapabilitiesResponse, error) {
