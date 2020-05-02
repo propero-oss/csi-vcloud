@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/alecthomas/units"
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/propero-oss/csi-vcloud/pkg/api"
 	"github.com/propero-oss/csi-vcloud/pkg/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/klog"
-	"os"
 )
 
 type Controller interface {
@@ -31,6 +31,7 @@ var (
 	controllerCaps = []csi.ControllerServiceCapability_RPC_Type{
 		csi.ControllerServiceCapability_RPC_CREATE_DELETE_VOLUME,
 		csi.ControllerServiceCapability_RPC_PUBLISH_UNPUBLISH_VOLUME,
+		csi.ControllerServiceCapability_RPC_GET_CAPACITY,
 	}
 )
 
@@ -42,18 +43,18 @@ func (c *controller) Init(config *common.Config) error {
 		panic(err)
 	}
 
-	c.manager.Client = client
+	c.manager = &api.Manager{
+		Client: client,
+		Config: config,
+		Vdc: nil,
+	}
 
 	vdc, err := c.manager.GetVDC(config.VCloud.ORG, config.VCloud.VDC)
 	if err != nil {
 		panic(err)
 	}
 
-	c.manager = &api.Manager{
-		Client: client,
-		Config: config,
-		Vdc: vdc,
-	}
+	c.manager.Vdc = vdc
 
 	return nil
 
@@ -70,7 +71,12 @@ func (c *controller) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequ
 	if req.GetCapacityRange() != nil && req.GetCapacityRange().RequiredBytes != 0 {
 		volSizeBytes = req.GetCapacityRange().GetRequiredBytes()
 	}
-	disk := c.manager.CreateIndependentDisk(req.Name, os.Getenv("STORAGE_PROFILE"), volSizeBytes)
+
+	disk, err := c.manager.CreateIndependentDisk(req.Name, "HHSuedVSAN", volSizeBytes)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "")
+	}
+
 
 	attributes := make(map[string]string)
 	
@@ -141,8 +147,14 @@ func (c *controller) GetCapacity(ctx context.Context, req *csi.GetCapacityReques
 	}
 
 	for _, record := range result.Results.OrgVdcStorageProfileRecord {
-		if record.Name == os.Getenv("STORAGE_PROFILE") {
-			resp.AvailableCapacity = int64(record.StorageLimitMB) * int64(common.MBinBytes)
+		if record.Name == "HHSuedVSAN" && record.VdcName == c.manager.Config.VCloud.VDC {
+			// response is in MiB not in MB!!
+			availableCap := record.StorageLimitMB - record.StorageUsedMB
+			if availableCap == 0 || availableCap < 0 {
+				resp.AvailableCapacity = 0
+			} else {
+				resp.AvailableCapacity = int64(availableCap) * int64(units.Mebibyte)
+			}
 		}
 	}
 

@@ -23,7 +23,7 @@ func (m *Manager) GetVMByVAppName(vAppName string, vmName string) (*govcd.VM, er
 }
 
 // CreateIndependentDisk
-func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, size int64) *types.Reference{
+func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, size int64) (*types.Reference, error){
 	var diskCreateParams *types.DiskCreateParams
 	diskCreateParams = &types.DiskCreateParams{Disk: &types.Disk{
 		Name: diskName,
@@ -33,7 +33,7 @@ func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, 
 	
 	profileRef, err := m.Vdc.FindStorageProfileReference(storageProfile)
 	if err != nil {
-		fmt.Print(err)
+		return nil, err
 	}
 
 	diskCreateParams.Disk.StorageProfile = &profileRef
@@ -43,18 +43,18 @@ func (m *Manager) CreateIndependentDisk(diskName string, storageProfile string, 
 
 	task, err := m.Vdc.CreateDisk(diskCreateParams)
 	if err != nil {
-		fmt.Print(err)
+		return nil, err
 	}
 
 	err = task.WaitTaskCompletion()
 	if err != nil {
-		fmt.Print(fmt.Errorf("error: %s", err))
+		return nil, err
 	}
 
-	return task.Task.Owner
+	return task.Task.Owner, nil
 }
 
-func (m *Manager) DeleteDisk(volId string) (error){
+func (m *Manager) DeleteDisk(volId string) error {
 	disk, err := m.Vdc.GetDiskById(volId, true)
 	if err != nil {
 		return err

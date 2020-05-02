@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/propero-oss/csi-vcloud/pkg/common"
 	"github.com/rexray/gocsi"
@@ -13,7 +14,7 @@ import (
 
 const (
 	// Name is the name of the CSI plug-in.
-	Name = "csi-vcloud.propero-oss.dev"
+	Name = "dev.propero-oss.csi-vcloud"
 
 	// VendorVersion is the version returned by GetPluginInfo.
 	VendorVersion = "0.0.1"
@@ -40,6 +41,13 @@ type service struct {
 
 
 func (s *service) BeforeServe(ctx context.Context, plugin *gocsi.StoragePlugin, listener net.Listener) error {
+	fmt.Println("Executed!")
+	mydir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(mydir)
+
 	defer func() {
 		fields := map[string]interface{}{
 			"mode": s.mode,

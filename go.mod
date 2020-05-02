@@ -3,18 +3,29 @@ module github.com/propero-oss/csi-vcloud
 go 1.14
 
 require (
-	github.com/akutz/gofsutil v0.1.2
+	github.com/akutz/memconn v0.1.0
+	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf
 	github.com/container-storage-interface/spec v1.2.0
-	github.com/davecgh/go-spew v1.1.1
 	github.com/getsentry/sentry-go v0.5.1
+	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d // indirect
+	github.com/golang/mock v1.3.1
+	github.com/golang/protobuf v1.4.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190118093823-f849b5445de4 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.9.5 // indirect
+	github.com/json-iterator/go v1.1.8 // indirect
+	github.com/kubernetes-csi/csi-test/v3 v3.1.0
+	github.com/onsi/ginkgo v1.12.0
+	github.com/onsi/gomega v1.9.0
+	github.com/prometheus/client_golang v1.0.0 // indirect
 	github.com/rexray/gocsi v1.2.1
+	github.com/sirupsen/logrus v1.4.2
 	github.com/vmware/go-vcloud-director/v2 v2.6.0
-	google.golang.org/grpc v1.23.1
+	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975 // indirect
+	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5 // indirect
+	golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3 // indirect
+	google.golang.org/grpc v1.25.1
 	gopkg.in/yaml.v2 v2.2.8
-	k8s.io/apimachinery v0.17.4
-	k8s.io/client-go v11.0.0+incompatible
 	k8s.io/klog v1.0.0
-	k8s.io/kubernetes v1.17.4
 )
 
 replace k8s.io/api => k8s.io/api v0.17.4

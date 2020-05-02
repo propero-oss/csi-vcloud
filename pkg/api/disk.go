@@ -9,12 +9,9 @@ import (
 
 func AttachDiskToVM(vm *govcd.VM, diskRef *types.Reference) {
 	var diskAttachParams *types.DiskAttachOrDetachParams
-	busNumber := 1
-	unitNumber := 0
+
 	diskAttachParams = &types.DiskAttachOrDetachParams{
 		Disk:       diskRef,
-		BusNumber:  &busNumber,
-		UnitNumber: &unitNumber,
 	}
 
 	task, err := vm.AttachDisk(diskAttachParams)

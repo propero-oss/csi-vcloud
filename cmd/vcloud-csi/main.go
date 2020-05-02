@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/propero-oss/csi-vcloud/pkg/api"
 	mycommon "github.com/propero-oss/csi-vcloud/pkg/common"
+	"github.com/propero-oss/csi-vcloud/pkg/provider"
+	"github.com/propero-oss/csi-vcloud/pkg/service"
+	"github.com/rexray/gocsi"
 	"k8s.io/klog"
 	"log"
 	"os"
@@ -34,7 +38,7 @@ func main() {
 	// Set the timeout to the maximum duration the program can afford to wait.
 	//defer sentry.Flush(2 * time.Second)
 
-	//gocsi.Run(context.Background(), service.Name, "A CSI Plugin for VMware vCloud Storage", "", provider.New())
+	gocsi.Run(context.Background(), service.Name, "A CSI Plugin for VMware vCloud Storage", "", provider.New())
 }
 
 func timeit(a func()) {
